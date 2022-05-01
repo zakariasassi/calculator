@@ -1,5 +1,6 @@
 import 'package:calculator/buttuns.dart';
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,6 +22,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var userInput = '';
+  var userOutbut = '';
+
   final List<String> buttns = [
     'C',
     'DEL',
@@ -46,9 +50,35 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 219, 183, 225),
+      backgroundColor: Color.fromARGB(255, 18, 18, 18),
       body: Column(children: <Widget>[
-        Expanded(child: Container()),
+        Expanded(
+            child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              SizedBox(
+                height: 50,
+              ),
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  userInput,
+                  style: TextStyle(color: Colors.white, fontSize: 29),
+                ),
+              ),
+              Container(
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  userOutbut,
+                  style: TextStyle(color: Colors.white, fontSize: 29),
+                ),
+              ),
+            ],
+          ),
+        )),
         Expanded(
             flex: 2,
             child: Container(
@@ -59,18 +89,54 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (BuildContext context, int index) {
                       if (index == 0) {
                         return myButtuns(
+                          buttonTaped: () {
+                            setState(() {
+                              userInput = '';
+                              userOutbut = '';
+                            });
+                          },
                           textButton: buttns[index],
                           color: Color.fromARGB(255, 255, 26, 26),
                           textColor: Color.fromARGB(255, 255, 255, 255),
                         );
                       } else if (index == 1) {
                         return myButtuns(
+                          buttonTaped: () {
+                            setState(() {
+                              if (userInput != '') {
+                                userInput = userInput.substring(
+                                    0, userInput.length - 1);
+                              }
+                            });
+                          },
+                          textButton: buttns[index],
+                          color: Color.fromARGB(255, 26, 255, 76),
+                          textColor: Color.fromARGB(255, 255, 255, 255),
+                        );
+                      } else if (index == buttns.length - 1) {
+                        return myButtuns(
+                          buttonTaped: () {
+                            setState(() {
+                              userInput = userInput.replaceAll("x", "*");
+                              Parser p = Parser();
+                              Expression exp = p.parse(userInput);
+                              ContextModel cm = ContextModel();
+                              double eval =
+                                  exp.evaluate(EvaluationType.REAL, cm);
+                              userOutbut = eval.toString();
+                            });
+                          },
                           textButton: buttns[index],
                           color: Color.fromARGB(255, 26, 255, 76),
                           textColor: Color.fromARGB(255, 255, 255, 255),
                         );
                       } else {
                         return myButtuns(
+                          buttonTaped: () {
+                            setState(() {
+                              userInput += buttns[index];
+                            });
+                          },
                           textButton: buttns[index],
                           color: isTorF(buttns[index])
                               ? Colors.deepPurple
